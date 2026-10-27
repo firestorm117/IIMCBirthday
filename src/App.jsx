@@ -105,10 +105,13 @@ export default function BirthdayRegister() {
           aria-label="Search birthdays"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") setQuery("");
+          }}
         />
 
         {q ? (
-          <div className="reg-list">
+          <div className="reg-list" aria-live="polite">
             {matches.length === 0 ? (
               <div className="reg-empty-upcoming">No matches.</div>
             ) : (
@@ -134,10 +137,13 @@ export default function BirthdayRegister() {
           <>
             <div className="reg-controls">
               <h2 className="reg-controls-title">Upcoming</h2>
-              <div className="reg-tabs">
+              <div className="reg-tabs" role="group" aria-label="Upcoming window">
                 {WINDOWS.map((w) => (
                   <button
                     key={w}
+                    type="button"
+                    aria-pressed={windowDays === w}
+                    aria-label={`Next ${w} days`}
                     className={"reg-tab" + (windowDays === w ? " active" : "")}
                     onClick={() => setWindowDays(w)}
                   >
