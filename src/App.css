@@ -1,3 +1,10 @@
+html, body {
+  margin: 0;
+  background: #E8E2D3;
+}
+#root { min-height: 100vh; }
+.reg-root { min-height: 100vh; }
+
 .reg-root {
   --paper: #E8E2D3;
   --ink: #232C42;
@@ -168,10 +175,11 @@
   font-size: 14px;
   color: inherit;
   background: transparent;
-  border: 1px solid var(--muted);
-  border-radius: 8px;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
 }
+.reg-search::placeholder { color: var(--muted); }
 .reg-search:focus {
-  outline: 2px solid currentColor;
-  outline-offset: 1px;
+  outline: none;
+  border-color: var(--teal);
 }

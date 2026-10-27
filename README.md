@@ -16,11 +16,11 @@ npm run preview  # serve the production build locally
 ## Project layout
 
 ```
-index.html       entry page
-src/main.jsx     React entry point
-src/App.jsx      app UI
+index.html          entry page
+src/main.jsx        React entry point
+src/App.jsx         app UI
+src/App.css         styles
 src/birthdays.json  birthday data
-src/App.css      styles
 ```
 
 ## Updating birthdays

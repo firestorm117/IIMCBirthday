@@ -4,7 +4,6 @@ import BIRTHDAYS from "./birthdays.json";
 
 const TOTAL_RECORDS = 484;
 
-
 const MONTH_ABBR = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const MONTH_FULL = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const WINDOWS = [7, 14, 30, 60];
@@ -132,48 +131,47 @@ export default function BirthdayRegister() {
             )}
           </div>
         ) : (
-        <>
-        <div className="reg-controls">
-          <h2 className="reg-controls-title">Upcoming</h2>
-          <div className="reg-tabs">
-            {WINDOWS.map((w) => (
-              <button
-                key={w}
-                className={"reg-tab" + (windowDays === w ? " active" : "")}
-                onClick={() => setWindowDays(w)}
-              >
-                {w}d
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="reg-list">
-          {groups.length === 0 ? (
-            <div className="reg-empty-upcoming">Nobody in the next {windowDays} days.</div>
-          ) : (
-            groups.map((g) => (
-              <div className="reg-row" key={`${g.month}-${g.day}`}>
-                <div className="reg-row-date">
-                  {MONTH_ABBR[g.month - 1]} {g.day}
-                </div>
-                <div className="reg-row-people">
-                  {g.people.map((p) => (
-                    <div className="reg-row-name-line" key={p.regno}>
-                      <span className="reg-row-name">{p.name}</span>
-                      <span className="reg-row-reg">{p.regno}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="reg-row-dist">
-                  {g.dist === 1 ? "tomorrow" : `in ${g.dist} days`}
-                </div>
+          <>
+            <div className="reg-controls">
+              <h2 className="reg-controls-title">Upcoming</h2>
+              <div className="reg-tabs">
+                {WINDOWS.map((w) => (
+                  <button
+                    key={w}
+                    className={"reg-tab" + (windowDays === w ? " active" : "")}
+                    onClick={() => setWindowDays(w)}
+                  >
+                    {w}d
+                  </button>
+                ))}
               </div>
-            ))
-          )}
-        </div>
+            </div>
 
-        </>
+            <div className="reg-list">
+              {groups.length === 0 ? (
+                <div className="reg-empty-upcoming">Nobody in the next {windowDays} days.</div>
+              ) : (
+                groups.map((g) => (
+                  <div className="reg-row" key={`${g.month}-${g.day}`}>
+                    <div className="reg-row-date">
+                      {MONTH_ABBR[g.month - 1]} {g.day}
+                    </div>
+                    <div className="reg-row-people">
+                      {g.people.map((p) => (
+                        <div className="reg-row-name-line" key={p.regno}>
+                          <span className="reg-row-name">{p.name}</span>
+                          <span className="reg-row-reg">{p.regno}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="reg-row-dist">
+                      {g.dist === 1 ? "tomorrow" : `in ${g.dist} days`}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </>
         )}
 
         <div className="reg-footer">
