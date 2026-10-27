@@ -1,7 +1,8 @@
 {
-  "name": "mba-birthday-register",
+  "name": "iimc-birthday",
   "private": true,
   "version": "0.0.1",
+  "description": "Birthday register for the MBA cohort",
   "type": "module",
   "scripts": {
     "dev": "vite",
