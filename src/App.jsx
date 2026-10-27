@@ -2,8 +2,6 @@ import React, { useState, useMemo } from "react";
 import "./App.css";
 import BIRTHDAYS from "./birthdays.json";
 
-const TOTAL_RECORDS = 484;
-
 const MONTH_ABBR = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const MONTH_FULL = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const WINDOWS = [7, 14, 30, 60];
@@ -74,7 +72,7 @@ export default function BirthdayRegister() {
       <div className="reg-wrap">
         <div className="reg-header">
           <h1 className="reg-title">Birthday Register</h1>
-          <p className="reg-sub">MBA cohort · {BIRTHDAYS.length} entries with a recorded date of birth</p>
+          <p className="reg-sub">MBA cohort</p>
         </div>
 
         <div className="reg-hero">
@@ -179,10 +177,6 @@ export default function BirthdayRegister() {
             </div>
           </>
         )}
-
-        <div className="reg-footer">
-          {BIRTHDAYS.length} of {TOTAL_RECORDS} records had a parseable date of birth.
-        </div>
       </div>
     </div>
   );
