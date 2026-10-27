@@ -18,10 +18,11 @@ npm run preview  # serve the production build locally
 ```
 index.html       entry page
 src/main.jsx     React entry point
-src/App.jsx      app UI and birthday data
+src/App.jsx      app UI
+src/birthdays.json  birthday data
 src/App.css      styles
 ```
 
 ## Updating birthdays
 
-The birthday list is the `BIRTHDAYS` array at the top of `src/App.jsx`. Each entry has `name`, `regno`, `month` and `day`.
+The birthday list lives in `src/birthdays.json`. Each entry has `name`, `regno`, `month` and `day`.

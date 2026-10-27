@@ -159,3 +159,19 @@
   color: var(--muted);
   text-align: right;
 }
+.reg-search {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 8px 0 18px;
+  padding: 10px 14px;
+  font: inherit;
+  font-size: 14px;
+  color: inherit;
+  background: transparent;
+  border: 1px solid var(--muted);
+  border-radius: 8px;
+}
+.reg-search:focus {
+  outline: 2px solid currentColor;
+  outline-offset: 1px;
+}
