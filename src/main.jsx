@@ -1,8 +1,10 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import '@fontsource-variable/fraunces/opsz.css'
+import '@fontsource/im-fell-english/400.css'
+import '@fontsource/im-fell-english/400-italic.css'
+import '@fontsource/im-fell-english-sc/400.css'
+import '@fontsource/playfair-display-sc/700.css'
 import '@fontsource/ibm-plex-sans/400.css'
-import '@fontsource/ibm-plex-sans/500.css'
 import '@fontsource/ibm-plex-sans/600.css'
 import App from './App.jsx'
 

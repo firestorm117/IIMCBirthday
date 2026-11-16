@@ -27,6 +27,52 @@ function ordinal(n) {
   return n + (s[(v - 20) % 10] || s[v] || s[0]);
 }
 
+const WEEKDAY = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+// Sheet names are usually all caps; show them as "Ashutosh Samal".
+function titleCase(name) {
+  return name.toLowerCase().replace(/(^|[\s'.-])\p{L}/gu, (c) => c.toUpperCase());
+}
+
+function weekdayIn(dist) {
+  const d = new Date();
+  d.setDate(d.getDate() + dist);
+  return WEEKDAY[d.getDay()];
+}
+
+function distLabel(dist) {
+  if (dist === 0) return "today";
+  if (dist === 1) return "tomorrow";
+  return `in ${dist} days`;
+}
+
+function DateTile({ month, day, dist }) {
+  return (
+    <div className="reg-tile" aria-label={`${MONTH_FULL[month - 1]} ${day}`}>
+      <span className="reg-tile-month">{MONTH_ABBR[month - 1]}</span>
+      <span className="reg-tile-day">{day}</span>
+      <span className="reg-tile-weekday">{weekdayIn(dist)}</span>
+    </div>
+  );
+}
+
+function Row({ month, day, dist, people }) {
+  return (
+    <div className="reg-row">
+      <DateTile month={month} day={day} dist={dist} />
+      <div className="reg-row-people">
+        {people.map((p) => (
+          <div className="reg-row-person" key={p.id}>
+            <span className="reg-row-name">{titleCase(p.name)}</span>
+            {p.regno && <span className="reg-row-reg">{p.regno}</span>}
+          </div>
+        ))}
+      </div>
+      <span className={"reg-pill" + (dist <= 1 ? " soon" : "")}>{distLabel(dist)}</span>
+    </div>
+  );
+}
+
 export default function BirthdayRegister() {
   const now = new Date();
   const todayMonth = now.getMonth() + 1;
@@ -88,40 +134,45 @@ export default function BirthdayRegister() {
   return (
     <div className="reg-root">
       <div className="reg-wrap">
-        <div className="reg-header">
+        <header className="reg-header">
           <h1 className="reg-title">Birthday Register</h1>
           <p className="reg-sub">MBA cohort</p>
-        </div>
+          <div className="reg-flourish" aria-hidden="true">
+            <span>❦&#xFE0E;</span>
+          </div>
+        </header>
 
-        <div className="reg-hero">
+        <section className="reg-hero">
           <p className="reg-hero-date">
             {MONTH_FULL[todayMonth - 1]} {ordinal(todayDay)}, {todayYear}
           </p>
           {status === "loading" ? (
-            <div className="reg-hero-empty">Loading birthdays…</div>
+            <div className="reg-frame reg-hero-empty">Loading birthdays…</div>
           ) : status === "error" ? (
-            <div className="reg-hero-empty reg-error" role="alert">
+            <div className="reg-frame reg-hero-empty reg-error" role="alert">
               {error}{" "}
               <button type="button" className="reg-retry" onClick={load}>
                 Retry
               </button>
             </div>
           ) : todayList.length === 0 ? (
-            <div className="reg-hero-empty">No birthdays today.</div>
+            <div className="reg-frame reg-hero-empty">No birthdays today.</div>
           ) : (
-            <div className="reg-hero-card">
+            <div className="reg-frame reg-hero-card">
               <p className="reg-hero-headline">
+                <span aria-hidden="true">❧&#xFE0E;</span>
                 {todayList.length === 1 ? "Birthday today" : `${todayList.length} birthdays today`}
+                <span aria-hidden="true">☙&#xFE0E;</span>
               </p>
               {todayList.map((p) => (
                 <div className="reg-hero-person" key={p.id}>
-                  <span className="reg-hero-person-name">{p.name}</span>
-                  <span className="reg-hero-person-reg">{p.regno}</span>
+                  <span className="reg-hero-person-name">{titleCase(p.name)}</span>
+                  {p.regno && <span className="reg-hero-person-reg">{p.regno}</span>}
                 </div>
               ))}
             </div>
           )}
-        </div>
+        </section>
 
         {status === "ready" && (
           <>
@@ -140,23 +191,10 @@ export default function BirthdayRegister() {
             {q ? (
               <div className="reg-list" aria-live="polite">
                 {matches.length === 0 ? (
-                  <div className="reg-empty-upcoming">No matches.</div>
+                  <div className="reg-empty">No matches.</div>
                 ) : (
                   matches.map((p) => (
-                    <div className="reg-row" key={p.id}>
-                      <div className="reg-row-date">
-                        {MONTH_ABBR[p.month - 1]} {p.day}
-                      </div>
-                      <div className="reg-row-people">
-                        <div className="reg-row-name-line">
-                          <span className="reg-row-name">{p.name}</span>
-                          <span className="reg-row-reg">{p.regno}</span>
-                        </div>
-                      </div>
-                      <div className="reg-row-dist">
-                        {p.dist === 0 ? "today" : p.dist === 1 ? "tomorrow" : `in ${p.dist} days`}
-                      </div>
-                    </div>
+                    <Row key={p.id} month={p.month} day={p.day} dist={p.dist} people={[p]} />
                   ))
                 )}
               </div>
@@ -182,26 +220,9 @@ export default function BirthdayRegister() {
 
                 <div className="reg-list">
                   {groups.length === 0 ? (
-                    <div className="reg-empty-upcoming">Nobody in the next {windowDays} days.</div>
+                    <div className="reg-empty">Nobody in the next {windowDays} days.</div>
                   ) : (
-                    groups.map((g) => (
-                      <div className="reg-row" key={`${g.month}-${g.day}`}>
-                        <div className="reg-row-date">
-                          {MONTH_ABBR[g.month - 1]} {g.day}
-                        </div>
-                        <div className="reg-row-people">
-                          {g.people.map((p) => (
-                            <div className="reg-row-name-line" key={p.id}>
-                              <span className="reg-row-name">{p.name}</span>
-                              <span className="reg-row-reg">{p.regno}</span>
-                            </div>
-                          ))}
-                        </div>
-                        <div className="reg-row-dist">
-                          {g.dist === 1 ? "tomorrow" : `in ${g.dist} days`}
-                        </div>
-                      </div>
-                    ))
+                    groups.map((g) => <Row key={`${g.month}-${g.day}`} {...g} />)
                   )}
                 </div>
               </>
