@@ -41,8 +41,8 @@ function weekdayIn(dist) {
 }
 
 function distLabel(dist) {
-  if (dist === 0) return "today";
-  if (dist === 1) return "tomorrow";
+  if (dist === 0) return "🎉 today";
+  if (dist === 1) return "🎉 tomorrow";
   return `in ${dist} days`;
 }
 
@@ -133,13 +133,13 @@ export default function BirthdayRegister() {
 
   return (
     <div className="reg-root">
+      <div className="reg-bunting" aria-hidden="true" />
       <div className="reg-wrap">
         <header className="reg-header">
-          <h1 className="reg-title">Birthday Register</h1>
+          <h1 className="reg-title">
+            Birthday <span className="reg-title-accent">Register</span>
+          </h1>
           <p className="reg-sub">MBA cohort</p>
-          <div className="reg-flourish" aria-hidden="true">
-            <span>❦&#xFE0E;</span>
-          </div>
         </header>
 
         <section className="reg-hero">
@@ -160,9 +160,10 @@ export default function BirthdayRegister() {
           ) : (
             <div className="reg-frame reg-hero-card">
               <p className="reg-hero-headline">
-                <span aria-hidden="true">❧&#xFE0E;</span>
-                {todayList.length === 1 ? "Birthday today" : `${todayList.length} birthdays today`}
-                <span aria-hidden="true">☙&#xFE0E;</span>
+                <span aria-hidden="true">🎂</span> Happy Birthday!
+              </p>
+              <p className="reg-hero-count">
+                {todayList.length === 1 ? "1 birthday today" : `${todayList.length} birthdays today`}
               </p>
               {todayList.map((p) => (
                 <div className="reg-hero-person" key={p.id}>

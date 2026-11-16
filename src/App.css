@@ -1,141 +1,154 @@
 html, body {
   margin: 0;
-  background: #F1E5C8;
+  background: #FFF7EC;
 }
 #root { min-height: 100vh; }
 
 .reg-root {
-  --paper: #F1E5C8;
-  --paper-light: #F8EFD8;
-  --tile: #FFFBF0;
-  --ink: #2B1B12;
-  --muted: #5E4B36;
-  --rule: #D7C49A;
-  --oxblood: #6E1F1F;
-  --gold: #8A6A24;
-  --serif: 'IM Fell English', Georgia, serif;
-  --serif-sc: 'IM Fell English SC', Georgia, serif;
-  --display: 'Playfair Display SC', Georgia, serif;
+  --bg: #FFF7EC;
+  --card: #FFFFFF;
+  --tile: #FFFBF5;
+  --ink: #2A1E3B;
+  --muted: #5F5370;
+  --rule: #F0DCC8;
+  --coral: #E0414F;
+  --purple: #6644E8;
+  --yellow: #FFC93C;
+  --hero: #FFE3EF;
+  --hero-ink: #4A1631;
+  --pill: #EFEAFF;
+  --pill-ink: #4B32B8;
+  --font: 'Fredoka', system-ui, sans-serif;
   --sans: 'IBM Plex Sans', system-ui, sans-serif;
-  --ornament: 'DejaVu Serif', 'Segoe UI Symbol', serif;
 
+  position: relative;
   min-height: 100vh;
-  padding: 32px 16px 60px;
+  padding: 58px 16px 60px;
   box-sizing: border-box;
-  font-family: var(--serif);
+  font-family: var(--font);
   color: var(--ink);
-  background:
-    radial-gradient(ellipse at 50% 0%, #FBF5E6 0%, transparent 55%),
-    radial-gradient(ellipse at 50% 100%, #E3D3AE 0%, transparent 60%),
-    var(--paper);
-  background-attachment: fixed;
+  background: var(--bg);
 }
 .reg-root * { box-sizing: border-box; }
+
+/* Confetti, faded out behind the header so it never sits under the title */
+.reg-root::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("./assets/confetti.svg") 0 0 / 180px 180px;
+  -webkit-mask-image: linear-gradient(transparent 0, transparent 230px, #000 330px);
+  mask-image: linear-gradient(transparent 0, transparent 230px, #000 330px);
+  pointer-events: none;
+}
+.reg-bunting {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 46px;
+  background: url("./assets/bunting.svg") 0 0 / 200px 46px repeat-x;
+}
 .reg-wrap {
+  position: relative;
   max-width: 600px;
   margin: 0 auto;
 }
 
-/* Header: engraved title over a double rule with a fleuron */
+/* Header */
 .reg-header {
   text-align: center;
-  margin-bottom: 22px;
+  margin-bottom: 18px;
 }
 .reg-title {
-  font-family: var(--display);
   font-weight: 700;
-  font-size: 30px;
-  letter-spacing: 0.02em;
+  font-size: 34px;
+  line-height: 1.1;
   margin: 0 0 4px;
 }
+.reg-title-accent { color: var(--coral); }
 .reg-sub {
-  font-style: italic;
-  font-size: 16px;
+  font-weight: 500;
+  font-size: 15px;
   color: var(--muted);
   margin: 0;
 }
-.reg-flourish {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 14px;
-  color: var(--gold);
-}
-.reg-flourish::before,
-.reg-flourish::after {
-  content: "";
-  flex: 1;
-  height: 5px;
-  border-top: 1px solid currentColor;
-  border-bottom: 1px solid currentColor;
-}
-.reg-flourish span {
-  font-family: var(--ornament);
-  font-size: 22px;
-  line-height: 1;
-}
 
 /* Today */
-.reg-hero { margin-bottom: 28px; }
+.reg-hero { margin-bottom: 26px; }
 .reg-hero-date {
   text-align: center;
-  font-style: italic;
-  font-size: 17px;
+  font-weight: 500;
+  font-size: 16px;
   color: var(--muted);
   margin: 0 0 12px;
 }
 .reg-frame {
-  border: 3px double var(--gold);
-  border-radius: 18px;
-  background: var(--paper-light);
-  box-shadow:
-    inset 0 0 0 5px var(--paper-light),
-    inset 0 0 0 6px rgba(138, 106, 36, 0.45);
+  position: relative;
   padding: 22px 24px;
+  border-radius: 26px;
+  background: var(--card);
+  box-shadow: 0 10px 24px -14px rgba(224, 65, 79, 0.6);
 }
 .reg-hero-empty {
   text-align: center;
-  font-style: italic;
+  font-weight: 500;
   font-size: 17px;
   color: var(--muted);
 }
-.reg-error { font-style: normal; color: var(--ink); }
+.reg-error { color: var(--ink); }
 .reg-retry {
   background: none;
   border: none;
   padding: 0;
   font: inherit;
-  color: var(--oxblood);
+  font-weight: 600;
+  color: var(--purple);
   text-decoration: underline;
   cursor: pointer;
 }
-.reg-hero-headline {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  font-family: var(--serif-sc);
-  font-size: 22px;
-  color: var(--oxblood);
-  margin: 0 0 10px;
+.reg-hero-card {
+  overflow: hidden;
+  padding-top: 36px;
+  text-align: center;
+  background: var(--hero);
+  color: var(--hero-ink);
 }
-.reg-hero-headline span {
-  font-family: var(--ornament);
-  font-size: 18px;
+.reg-hero-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 26px;
+  background: url("./assets/icing.svg") 0 0 / 120px 26px repeat-x;
+}
+.reg-hero-headline {
+  font-weight: 700;
+  font-size: 26px;
+  margin: 0;
+}
+.reg-hero-count {
+  font-weight: 500;
+  font-size: 14px;
+  opacity: 0.8;
+  margin: 0 0 10px;
 }
 .reg-hero-person {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1px;
   padding: 8px 0;
-  border-top: 1px dotted rgba(138, 106, 36, 0.6);
+  border-top: 2px dashed rgba(74, 22, 49, 0.18);
 }
-.reg-hero-person-name { font-size: 20px; }
+.reg-hero-person-name {
+  font-weight: 600;
+  font-size: 21px;
+}
 .reg-hero-person-reg {
   font-family: var(--sans);
   font-size: 12px;
-  color: var(--muted);
+  opacity: 0.8;
   font-variant-numeric: tabular-nums;
 }
 
@@ -144,34 +157,31 @@ html, body {
   width: 100%;
   margin: 0 0 20px;
   padding: 11px 18px;
-  font-family: var(--serif);
-  font-style: italic;
+  font-family: var(--font);
   font-size: 16px;
   color: var(--ink);
-  background: var(--tile);
-  border: 1px solid var(--gold);
+  background: var(--card);
+  border: 2px solid var(--rule);
   border-radius: 999px;
 }
 .reg-search::placeholder { color: var(--muted); }
 .reg-search:focus {
   outline: none;
-  border-color: var(--oxblood);
-  box-shadow: 0 0 0 3px rgba(110, 31, 31, 0.15);
+  border-color: var(--purple);
 }
 
 /* Upcoming header and window buttons */
 .reg-controls {
   display: flex;
-  align-items: center;
   flex-wrap: wrap;
+  align-items: center;
   justify-content: space-between;
   gap: 8px 12px;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 .reg-controls-title {
-  font-family: var(--serif-sc);
-  font-weight: 400;
-  font-size: 23px;
+  font-weight: 700;
+  font-size: 24px;
   margin: 0;
 }
 .reg-tabs {
@@ -179,12 +189,13 @@ html, body {
   gap: 2px;
   padding: 3px;
   border-radius: 999px;
-  background: rgba(110, 31, 31, 0.08);
+  background: #F6E8D8;
 }
 .reg-tab {
-  padding: 4px 11px;
-  font-family: var(--sans);
-  font-size: 13px;
+  padding: 4px 12px;
+  font-family: var(--font);
+  font-weight: 500;
+  font-size: 14px;
   color: var(--muted);
   background: none;
   border: none;
@@ -192,58 +203,69 @@ html, body {
   cursor: pointer;
 }
 .reg-tab.active {
-  background: var(--oxblood);
-  color: var(--paper-light);
+  background: var(--purple);
+  color: #FFFFFF;
   font-weight: 600;
 }
 .reg-tab:focus-visible {
-  outline: 2px solid var(--oxblood);
+  outline: 2px solid var(--purple);
   outline-offset: 2px;
 }
 
 /* Rows */
-.reg-list { display: flex; flex-direction: column; gap: 10px; }
+.reg-list { display: flex; flex-direction: column; gap: 12px; }
 .reg-row {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 10px 12px;
-  background: var(--paper-light);
-  border: 1px solid var(--rule);
-  border-radius: 18px;
-  box-shadow: 0 1px 2px rgba(60, 35, 10, 0.06);
+  padding: 12px 12px 10px;
+  background: var(--card);
+  border-radius: 22px;
+  box-shadow: 0 6px 16px -12px rgba(42, 30, 59, 0.35);
 }
+
+/* Date tile as a gift box: coloured lid, bow on top */
 .reg-tile {
+  --band: #FF9A9A;
+  position: relative;
   flex: 0 0 54px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  overflow: hidden;
   background: var(--tile);
-  border: 1px solid var(--rule);
   border-radius: 12px;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.08);
+}
+.reg-row:nth-child(4n + 2) .reg-tile { --band: #FFC93C; }
+.reg-row:nth-child(4n + 3) .reg-tile { --band: #5FD6C9; }
+.reg-row:nth-child(4n + 4) .reg-tile { --band: #C8B4FF; }
+.reg-tile::after {
+  content: "🎀";
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 14px;
+  line-height: 1;
 }
 .reg-tile-month {
   align-self: stretch;
   text-align: center;
-  padding: 3px 0;
-  font-family: var(--sans);
+  padding: 6px 0 2px;
+  border-radius: 12px 12px 0 0;
   font-weight: 600;
   font-size: 10px;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  background: var(--oxblood);
-  color: var(--paper-light);
+  background: var(--band);
+  color: var(--ink);
 }
 .reg-tile-day {
-  font-family: var(--display);
   font-weight: 700;
-  font-size: 22px;
+  font-size: 23px;
   line-height: 1.15;
-  padding-top: 1px;
 }
 .reg-tile-weekday {
-  font-family: var(--sans);
   font-size: 10px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -258,7 +280,11 @@ html, body {
   gap: 6px;
 }
 .reg-row-person { display: flex; flex-direction: column; }
-.reg-row-name { font-size: 17px; line-height: 1.25; }
+.reg-row-name {
+  font-weight: 500;
+  font-size: 17px;
+  line-height: 1.25;
+}
 .reg-row-reg {
   font-family: var(--sans);
   font-size: 12px;
@@ -270,23 +296,21 @@ html, body {
   align-self: flex-start;
   margin-top: 2px;
   padding: 2px 10px;
-  font-family: var(--sans);
-  font-size: 12px;
-  color: var(--oxblood);
-  border: 1px solid rgba(110, 31, 31, 0.45);
+  font-weight: 600;
+  font-size: 12.5px;
+  color: var(--pill-ink);
+  background: var(--pill);
   border-radius: 999px;
   white-space: nowrap;
 }
 .reg-pill.soon {
-  background: var(--oxblood);
-  border-color: var(--oxblood);
-  color: var(--paper-light);
-  font-weight: 600;
+  background: var(--yellow);
+  color: #3A2A00;
 }
 .reg-empty {
   padding: 18px 0;
   text-align: center;
-  font-style: italic;
+  font-weight: 500;
   font-size: 16px;
   color: var(--muted);
 }
