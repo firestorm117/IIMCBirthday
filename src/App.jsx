@@ -34,10 +34,40 @@ function titleCase(name) {
   return name.toLowerCase().replace(/(^|[\s'.-])\p{L}/gu, (c) => c.toUpperCase());
 }
 
-function weekdayIn(dist) {
-  const d = new Date();
-  d.setDate(d.getDate() + dist);
-  return WEEKDAY[d.getDay()];
+function weekdayIn(todayWeekday, dist) {
+  return WEEKDAY[(todayWeekday + dist) % 7];
+}
+
+function dateKey(d) {
+  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+}
+
+// The current date, refreshed just after local midnight. Phones and laptops
+// pause timers while asleep, so also re-check when the page becomes visible.
+function useToday() {
+  const [today, setToday] = useState(() => new Date());
+
+  useEffect(() => {
+    const refresh = () => {
+      const now = new Date();
+      setToday((prev) => (dateKey(prev) === dateKey(now) ? prev : now));
+    };
+    const nextMidnight = new Date(today);
+    nextMidnight.setHours(24, 0, 1, 0);
+    const timer = setTimeout(refresh, nextMidnight - Date.now());
+    const onVisible = () => {
+      if (document.visibilityState === "visible") refresh();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", refresh);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", refresh);
+    };
+  }, [today]);
+
+  return today;
 }
 
 function distLabel(dist) {
@@ -46,20 +76,20 @@ function distLabel(dist) {
   return `in ${dist} days`;
 }
 
-function DateTile({ month, day, dist }) {
+function DateTile({ month, day, weekday }) {
   return (
     <div className="reg-tile" aria-label={`${MONTH_FULL[month - 1]} ${day}`}>
       <span className="reg-tile-month">{MONTH_ABBR[month - 1]}</span>
       <span className="reg-tile-day">{day}</span>
-      <span className="reg-tile-weekday">{weekdayIn(dist)}</span>
+      <span className="reg-tile-weekday">{weekday}</span>
     </div>
   );
 }
 
-function Row({ month, day, dist, people }) {
+function Row({ month, day, dist, weekday, people }) {
   return (
     <div className="reg-row">
-      <DateTile month={month} day={day} dist={dist} />
+      <DateTile month={month} day={day} weekday={weekday} />
       <div className="reg-row-people">
         {people.map((p) => (
           <div className="reg-row-person" key={p.id}>
@@ -74,10 +104,11 @@ function Row({ month, day, dist, people }) {
 }
 
 export default function BirthdayRegister() {
-  const now = new Date();
-  const todayMonth = now.getMonth() + 1;
-  const todayDay = now.getDate();
-  const todayYear = now.getFullYear();
+  const today = useToday();
+  const todayMonth = today.getMonth() + 1;
+  const todayDay = today.getDate();
+  const todayYear = today.getFullYear();
+  const todayWeekday = today.getDay();
   const [windowDays, setWindowDays] = useState(30);
   const [query, setQuery] = useState("");
   const [people, setPeople] = useState([]);
@@ -105,9 +136,12 @@ export default function BirthdayRegister() {
     return people.filter(
       (p) => p.name.toLowerCase().includes(q) || p.regno.toLowerCase().includes(q)
     )
-      .map((p) => ({ ...p, dist: daysUntil(p.month, p.day, todayMonth, todayDay, todayYear) }))
+      .map((p) => {
+        const dist = daysUntil(p.month, p.day, todayMonth, todayDay, todayYear);
+        return { ...p, dist, weekday: weekdayIn(todayWeekday, dist) };
+      })
       .sort((a, b) => a.name.localeCompare(b.name));
-  }, [people, q, todayMonth, todayDay, todayYear]);
+  }, [people, q, todayMonth, todayDay, todayYear, todayWeekday]);
 
   const { todayList, groups } = useMemo(() => {
     const withDist = people.map((p) => ({
@@ -123,13 +157,19 @@ export default function BirthdayRegister() {
     let current = null;
     for (const p of upcoming) {
       if (!current || current.month !== p.month || current.day !== p.day) {
-        current = { month: p.month, day: p.day, dist: p.dist, people: [] };
+        current = {
+          month: p.month,
+          day: p.day,
+          dist: p.dist,
+          weekday: weekdayIn(todayWeekday, p.dist),
+          people: [],
+        };
         groups.push(current);
       }
       current.people.push(p);
     }
     return { todayList, groups };
-  }, [people, windowDays, todayMonth, todayDay, todayYear]);
+  }, [people, windowDays, todayMonth, todayDay, todayYear, todayWeekday]);
 
   return (
     <div className="reg-root">
@@ -195,7 +235,14 @@ export default function BirthdayRegister() {
                   <div className="reg-empty">No matches.</div>
                 ) : (
                   matches.map((p) => (
-                    <Row key={p.id} month={p.month} day={p.day} dist={p.dist} people={[p]} />
+                    <Row
+                      key={p.id}
+                      month={p.month}
+                      day={p.day}
+                      dist={p.dist}
+                      weekday={p.weekday}
+                      people={[p]}
+                    />
                   ))
                 )}
               </div>
