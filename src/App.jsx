@@ -1,42 +1,11 @@
 import React, { useState, useMemo, useEffect, useCallback } from "react";
 import "./App.css";
 import { loadBirthdays } from "./sheet.js";
+import { MONTH_FULL, daysUntil, ordinal, weekdayIn } from "./dates.js";
+import Row, { titleCase } from "./Row.jsx";
+import Calendar from "./Calendar.jsx";
 
-const MONTH_ABBR = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const MONTH_FULL = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const WINDOWS = [7, 14, 30, 60];
-
-function daysInMonth(month, year) {
-  return new Date(year, month, 0).getDate();
-}
-
-function daysUntil(month, day, todayMonth, todayDay, todayYear) {
-  if (month === todayMonth && day === todayDay) return 0;
-  let target = new Date(todayYear, month - 1, Math.min(day, daysInMonth(month, todayYear)));
-  const today = new Date(todayYear, todayMonth - 1, todayDay);
-  if (target < today) {
-    target = new Date(todayYear + 1, month - 1, Math.min(day, daysInMonth(month, todayYear + 1)));
-  }
-  const diff = Math.round((target - today) / 86400000);
-  return diff;
-}
-
-function ordinal(n) {
-  const s = ["th", "st", "nd", "rd"];
-  const v = n % 100;
-  return n + (s[(v - 20) % 10] || s[v] || s[0]);
-}
-
-const WEEKDAY = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
-// Sheet names are usually all caps; show them as "Ashutosh Samal".
-function titleCase(name) {
-  return name.toLowerCase().replace(/(^|[\s'.-])\p{L}/gu, (c) => c.toUpperCase());
-}
-
-function weekdayIn(todayWeekday, dist) {
-  return WEEKDAY[(todayWeekday + dist) % 7];
-}
 
 function dateKey(d) {
   return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
@@ -70,37 +39,26 @@ function useToday() {
   return today;
 }
 
-function distLabel(dist) {
-  if (dist === 0) return "🎉 today";
-  if (dist === 1) return "🎉 tomorrow";
-  return `in ${dist} days`;
+const MODES = [
+  ["upcoming", "Upcoming"],
+  ["calendar", "Calendar"],
+];
+
+// Remember the last view on this device; storage can be unavailable.
+function readMode() {
+  try {
+    return localStorage.getItem("reg-mode") === "calendar" ? "calendar" : "upcoming";
+  } catch {
+    return "upcoming";
+  }
 }
 
-function DateTile({ month, day, weekday }) {
-  return (
-    <div className="reg-tile" aria-label={`${MONTH_FULL[month - 1]} ${day}`}>
-      <span className="reg-tile-month">{MONTH_ABBR[month - 1]}</span>
-      <span className="reg-tile-day">{day}</span>
-      <span className="reg-tile-weekday">{weekday}</span>
-    </div>
-  );
-}
-
-function Row({ month, day, dist, weekday, people }) {
-  return (
-    <div className="reg-row">
-      <DateTile month={month} day={day} weekday={weekday} />
-      <div className="reg-row-people">
-        {people.map((p) => (
-          <div className="reg-row-person" key={p.id}>
-            <span className="reg-row-name">{titleCase(p.name)}</span>
-            {p.regno && <span className="reg-row-reg">{p.regno}</span>}
-          </div>
-        ))}
-      </div>
-      <span className={"reg-pill" + (dist <= 1 ? " soon" : "")}>{distLabel(dist)}</span>
-    </div>
-  );
+function saveMode(mode) {
+  try {
+    localStorage.setItem("reg-mode", mode);
+  } catch {
+    // Not critical.
+  }
 }
 
 export default function BirthdayRegister() {
@@ -110,6 +68,7 @@ export default function BirthdayRegister() {
   const todayYear = today.getFullYear();
   const todayWeekday = today.getDay();
   const [windowDays, setWindowDays] = useState(30);
+  const [mode, setMode] = useState(readMode);
   const [query, setQuery] = useState("");
   const [people, setPeople] = useState([]);
   const [status, setStatus] = useState("loading");
@@ -249,30 +208,51 @@ export default function BirthdayRegister() {
             ) : (
               <>
                 <div className="reg-controls">
-                  <h2 className="reg-controls-title">Upcoming</h2>
-                  <div className="reg-tabs" role="group" aria-label="Upcoming window">
-                    {WINDOWS.map((w) => (
+                  <div className="reg-views" role="group" aria-label="View">
+                    {MODES.map(([key, label]) => (
                       <button
-                        key={w}
+                        key={key}
                         type="button"
-                        aria-pressed={windowDays === w}
-                        aria-label={`Next ${w} days`}
-                        className={"reg-tab" + (windowDays === w ? " active" : "")}
-                        onClick={() => setWindowDays(w)}
+                        aria-pressed={mode === key}
+                        className={"reg-view" + (mode === key ? " active" : "")}
+                        onClick={() => {
+                          setMode(key);
+                          saveMode(key);
+                        }}
                       >
-                        {w}d
+                        {label}
                       </button>
                     ))}
                   </div>
-                </div>
-
-                <div className="reg-list">
-                  {groups.length === 0 ? (
-                    <div className="reg-empty">Nobody in the next {windowDays} days.</div>
-                  ) : (
-                    groups.map((g) => <Row key={`${g.month}-${g.day}`} {...g} />)
+                  {mode === "upcoming" && (
+                    <div className="reg-tabs" role="group" aria-label="Upcoming window">
+                      {WINDOWS.map((w) => (
+                        <button
+                          key={w}
+                          type="button"
+                          aria-pressed={windowDays === w}
+                          aria-label={`Next ${w} days`}
+                          className={"reg-tab" + (windowDays === w ? " active" : "")}
+                          onClick={() => setWindowDays(w)}
+                        >
+                          {w}d
+                        </button>
+                      ))}
+                    </div>
                   )}
                 </div>
+
+                {mode === "calendar" ? (
+                  <Calendar people={people} today={today} />
+                ) : (
+                  <div className="reg-list">
+                    {groups.length === 0 ? (
+                      <div className="reg-empty">Nobody in the next {windowDays} days.</div>
+                    ) : (
+                      groups.map((g) => <Row key={`${g.month}-${g.day}`} {...g} />)
+                    )}
+                  </div>
+                )}
               </>
             )}
           </>

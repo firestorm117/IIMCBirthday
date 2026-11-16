@@ -18,7 +18,10 @@ npm run preview  # serve the production build locally
 ```
 index.html          entry page
 src/main.jsx        React entry point
-src/App.jsx         app UI
+src/App.jsx         app shell, today card, search, upcoming list
+src/Calendar.jsx    month calendar view
+src/Row.jsx         date tile and person row
+src/dates.js        date helpers
 src/App.css         styles
 src/config.js       Google Sheet ID and tab name
 src/sheet.js        loads and parses the sheet
