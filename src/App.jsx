@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import "./App.css";
-import BIRTHDAYS from "./birthdays.json";
+import { loadBirthdays } from "./sheet.js";
 
 const MONTH_ABBR = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const MONTH_FULL = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -34,19 +34,37 @@ export default function BirthdayRegister() {
   const todayYear = now.getFullYear();
   const [windowDays, setWindowDays] = useState(30);
   const [query, setQuery] = useState("");
+  const [people, setPeople] = useState([]);
+  const [status, setStatus] = useState("loading");
+  const [error, setError] = useState("");
+
+  const load = useCallback(() => {
+    setStatus("loading");
+    loadBirthdays()
+      .then((list) => {
+        setPeople(list);
+        setStatus("ready");
+      })
+      .catch((e) => {
+        setError(e.message || "Could not load birthdays.");
+        setStatus("error");
+      });
+  }, []);
+
+  useEffect(load, [load]);
   const q = query.trim().toLowerCase();
 
   const matches = useMemo(() => {
     if (!q) return [];
-    return BIRTHDAYS.filter(
+    return people.filter(
       (p) => p.name.toLowerCase().includes(q) || p.regno.toLowerCase().includes(q)
     )
       .map((p) => ({ ...p, dist: daysUntil(p.month, p.day, todayMonth, todayDay, todayYear) }))
       .sort((a, b) => a.name.localeCompare(b.name));
-  }, [q, todayMonth, todayDay, todayYear]);
+  }, [people, q, todayMonth, todayDay, todayYear]);
 
   const { todayList, groups } = useMemo(() => {
-    const withDist = BIRTHDAYS.map((p) => ({
+    const withDist = people.map((p) => ({
       ...p,
       dist: daysUntil(p.month, p.day, todayMonth, todayDay, todayYear),
     }));
@@ -65,7 +83,7 @@ export default function BirthdayRegister() {
       current.people.push(p);
     }
     return { todayList, groups };
-  }, [windowDays, todayMonth, todayDay, todayYear]);
+  }, [people, windowDays, todayMonth, todayDay, todayYear]);
 
   return (
     <div className="reg-root">
@@ -79,7 +97,16 @@ export default function BirthdayRegister() {
           <p className="reg-hero-date">
             {MONTH_FULL[todayMonth - 1]} {ordinal(todayDay)}, {todayYear}
           </p>
-          {todayList.length === 0 ? (
+          {status === "loading" ? (
+            <div className="reg-hero-empty">Loading birthdays…</div>
+          ) : status === "error" ? (
+            <div className="reg-hero-empty reg-error" role="alert">
+              {error}{" "}
+              <button type="button" className="reg-retry" onClick={load}>
+                Retry
+              </button>
+            </div>
+          ) : todayList.length === 0 ? (
             <div className="reg-hero-empty">No birthdays today.</div>
           ) : (
             <div className="reg-hero-card">
@@ -87,7 +114,7 @@ export default function BirthdayRegister() {
                 {todayList.length === 1 ? "Birthday today" : `${todayList.length} birthdays today`}
               </p>
               {todayList.map((p) => (
-                <div className="reg-hero-person" key={p.regno}>
+                <div className="reg-hero-person" key={p.id}>
                   <span className="reg-hero-person-name">{p.name}</span>
                   <span className="reg-hero-person-reg">{p.regno}</span>
                 </div>
@@ -96,85 +123,89 @@ export default function BirthdayRegister() {
           )}
         </div>
 
-        <input
-          className="reg-search"
-          type="search"
-          placeholder="Search by name or reg no."
-          aria-label="Search birthdays"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Escape") setQuery("");
-          }}
-        />
-
-        {q ? (
-          <div className="reg-list" aria-live="polite">
-            {matches.length === 0 ? (
-              <div className="reg-empty-upcoming">No matches.</div>
-            ) : (
-              matches.map((p) => (
-                <div className="reg-row" key={p.regno}>
-                  <div className="reg-row-date">
-                    {MONTH_ABBR[p.month - 1]} {p.day}
-                  </div>
-                  <div className="reg-row-people">
-                    <div className="reg-row-name-line">
-                      <span className="reg-row-name">{p.name}</span>
-                      <span className="reg-row-reg">{p.regno}</span>
-                    </div>
-                  </div>
-                  <div className="reg-row-dist">
-                    {p.dist === 0 ? "today" : p.dist === 1 ? "tomorrow" : `in ${p.dist} days`}
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        ) : (
+        {status === "ready" && (
           <>
-            <div className="reg-controls">
-              <h2 className="reg-controls-title">Upcoming</h2>
-              <div className="reg-tabs" role="group" aria-label="Upcoming window">
-                {WINDOWS.map((w) => (
-                  <button
-                    key={w}
-                    type="button"
-                    aria-pressed={windowDays === w}
-                    aria-label={`Next ${w} days`}
-                    className={"reg-tab" + (windowDays === w ? " active" : "")}
-                    onClick={() => setWindowDays(w)}
-                  >
-                    {w}d
-                  </button>
-                ))}
-              </div>
-            </div>
+            <input
+              className="reg-search"
+              type="search"
+              placeholder="Search by name or reg no."
+              aria-label="Search birthdays"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") setQuery("");
+              }}
+            />
 
-            <div className="reg-list">
-              {groups.length === 0 ? (
-                <div className="reg-empty-upcoming">Nobody in the next {windowDays} days.</div>
-              ) : (
-                groups.map((g) => (
-                  <div className="reg-row" key={`${g.month}-${g.day}`}>
-                    <div className="reg-row-date">
-                      {MONTH_ABBR[g.month - 1]} {g.day}
-                    </div>
-                    <div className="reg-row-people">
-                      {g.people.map((p) => (
-                        <div className="reg-row-name-line" key={p.regno}>
+            {q ? (
+              <div className="reg-list" aria-live="polite">
+                {matches.length === 0 ? (
+                  <div className="reg-empty-upcoming">No matches.</div>
+                ) : (
+                  matches.map((p) => (
+                    <div className="reg-row" key={p.id}>
+                      <div className="reg-row-date">
+                        {MONTH_ABBR[p.month - 1]} {p.day}
+                      </div>
+                      <div className="reg-row-people">
+                        <div className="reg-row-name-line">
                           <span className="reg-row-name">{p.name}</span>
                           <span className="reg-row-reg">{p.regno}</span>
                         </div>
-                      ))}
+                      </div>
+                      <div className="reg-row-dist">
+                        {p.dist === 0 ? "today" : p.dist === 1 ? "tomorrow" : `in ${p.dist} days`}
+                      </div>
                     </div>
-                    <div className="reg-row-dist">
-                      {g.dist === 1 ? "tomorrow" : `in ${g.dist} days`}
-                    </div>
+                  ))
+                )}
+              </div>
+            ) : (
+              <>
+                <div className="reg-controls">
+                  <h2 className="reg-controls-title">Upcoming</h2>
+                  <div className="reg-tabs" role="group" aria-label="Upcoming window">
+                    {WINDOWS.map((w) => (
+                      <button
+                        key={w}
+                        type="button"
+                        aria-pressed={windowDays === w}
+                        aria-label={`Next ${w} days`}
+                        className={"reg-tab" + (windowDays === w ? " active" : "")}
+                        onClick={() => setWindowDays(w)}
+                      >
+                        {w}d
+                      </button>
+                    ))}
                   </div>
-                ))
-              )}
-            </div>
+                </div>
+
+                <div className="reg-list">
+                  {groups.length === 0 ? (
+                    <div className="reg-empty-upcoming">Nobody in the next {windowDays} days.</div>
+                  ) : (
+                    groups.map((g) => (
+                      <div className="reg-row" key={`${g.month}-${g.day}`}>
+                        <div className="reg-row-date">
+                          {MONTH_ABBR[g.month - 1]} {g.day}
+                        </div>
+                        <div className="reg-row-people">
+                          {g.people.map((p) => (
+                            <div className="reg-row-name-line" key={p.id}>
+                              <span className="reg-row-name">{p.name}</span>
+                              <span className="reg-row-reg">{p.regno}</span>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="reg-row-dist">
+                          {g.dist === 1 ? "tomorrow" : `in ${g.dist} days`}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </>
+            )}
           </>
         )}
       </div>

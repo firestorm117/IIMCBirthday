@@ -20,7 +20,8 @@ index.html          entry page
 src/main.jsx        React entry point
 src/App.jsx         app UI
 src/App.css         styles
-src/birthdays.json  birthday data
+src/config.js       Google Sheet ID and tab name
+src/sheet.js        loads and parses the sheet
 ```
 
 ## Updating birthdays
